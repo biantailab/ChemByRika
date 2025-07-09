@@ -1,4 +1,5 @@
-![Icon](README/launcher.png)
+<img src="README/launcher.png" alt="Hexo logo" width="100" height="100" align="right" />
+
 # ChemByRika
 
 An elevated third-party client or web app for Chemistry By Design
@@ -7,6 +8,8 @@ An elevated third-party client or web app for Chemistry By Design
 这是一个可以用来代替Chemistry By Design的**离线**第三方客户端/网页应用。
 
 [Android 应用下载](https://github.com/RikaSugisawa/ChemByRika/releases)
+
+[网页](https://chembyrika.netlify.app)
 
 目前仅提供英文支持，内部合成路线定期发布更新。
 
