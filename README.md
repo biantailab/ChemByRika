@@ -1,4 +1,4 @@
-<img src="README/launcher.png" alt="Hexo logo" width="100" height="100" align="right" />
+<img src="README/launcher.png" alt="ChemByRika logo" width="100" height="100" align="right" />
 
 # ChemByRika
 
