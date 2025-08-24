@@ -234,7 +234,7 @@ jobs:
     - name: Create gradle wrapper
       run: |
         cd android
-        gradle wrapper
+        gradle wrapper --gradle-version 8.2.1
         
     - name: Build APK
       run: |

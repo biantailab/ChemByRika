@@ -55,6 +55,13 @@ jobs:
         sed -i 's/<description>A sample Apache Cordova application<\/description>/<description>Chemistry By Design Offline Client<\/description>/g' config.xml
         sed -i 's/<author email="dev@cordova.apache.org" href="https:\/\/cordova.apache.org">Apache Cordova Team<\/author>/<author email="rika@example.com" href="https:\/\/github.com\/RikaSugisawa">Rika<\/author>/g' config.xml
         
+        # Ensure drawable directories exist
+        mkdir -p platforms/android/app/src/main/res/drawable
+        mkdir -p platforms/android/app/src/main/res/drawable-hdpi
+        mkdir -p platforms/android/app/src/main/res/drawable-mdpi
+        mkdir -p platforms/android/app/src/main/res/drawable-xhdpi
+        mkdir -p platforms/android/app/src/main/res/drawable-xxhdpi
+        
         # Copy favicon as app icon
         cp ../favicon.ico platforms/android/app/src/main/res/drawable/icon.png
         cp ../favicon.ico platforms/android/app/src/main/res/drawable-hdpi/icon.png
@@ -72,6 +79,11 @@ jobs:
         cordova plugin add cordova-plugin-whitelist
         cordova plugin add cordova-plugin-file
         cordova plugin add cordova-plugin-device
+        
+    - name: Create gradle wrapper
+      run: |
+        cd chembyrika-app/platforms/android
+        gradle wrapper --gradle-version 8.2.1
         
     - name: Build APK
       run: |

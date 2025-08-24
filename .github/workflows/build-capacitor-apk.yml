@@ -20,7 +20,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
         
     - name: Install Capacitor
       run: |
@@ -67,6 +66,11 @@ jobs:
         if ! grep -q "android.permission.INTERNET" android/app/src/main/AndroidManifest.xml; then
           sed -i '/<application/a \        <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
         fi
+        
+    - name: Create gradle wrapper
+      run: |
+        cd android
+        gradle wrapper --gradle-version 8.2.1
         
     - name: Build APK
       run: |
