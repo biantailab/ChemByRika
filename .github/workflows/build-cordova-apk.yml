@@ -45,13 +45,7 @@ jobs:
         # Remove default www content
         rm -rf www/*
         # Copy project files to www
-        cp -r ../* www/
-        # Remove unnecessary files
-        rm -rf www/chembyrika-app
-        rm -rf www/.github
-        rm -rf www/README
-        rm -f www/*.md
-        rm -f www/.gitignore
+        rsync -av --exclude 'chembyrika-app' --exclude '.github' --exclude 'README' --exclude '*.md' --exclude '.gitignore' ../ ./www/
         
     - name: Configure Cordova
       run: |

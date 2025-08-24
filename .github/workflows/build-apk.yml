@@ -35,12 +35,7 @@ jobs:
         
     - name: Copy web assets
       run: |
-        cp -r * android/app/src/main/assets/
-        # Remove unnecessary files from assets
-        rm -rf android/app/src/main/assets/android
-        rm -rf android/app/src/main/assets/.github
-        rm -rf android/app/src/main/assets/README
-        rm -f android/app/src/main/assets/*.md
+        rsync -av --exclude 'android' --exclude '.github' --exclude 'README' --exclude '*.md' ./ android/app/src/main/assets/
         
     - name: Create Android manifest
       run: |

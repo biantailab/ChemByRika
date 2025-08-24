@@ -51,6 +51,7 @@ jobs:
     - name: Copy web assets
       run: |
         # Copy all web assets to the web directory
+        rsync -av --exclude 'android' ./ ./
         npx cap copy android
         
     - name: Configure Android app
