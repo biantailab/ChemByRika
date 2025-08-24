@@ -5,103 +5,55 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  release:
-    types: [ published ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        
+
     - name: Install Capacitor
-      run: |
-        npm install -g @capacitor/cli
-        npm install -g @capacitor/core
-        capacitor --version
-        
-    - name: Set up Android SDK
-      uses: android-actions/setup-android@v3
-      
+      run: npm install -g @capacitor/cli
+
     - name: Initialize Capacitor project
       run: |
-        # Create package.json if it doesn't exist
         if [ ! -f package.json ]; then
           npm init -y
         fi
-        
-        # Install Capacitor dependencies
         npm install @capacitor/core @capacitor/android
-        
-        # Initialize Capacitor
         npx cap init "Chem by Rika" com.chembyrika.app --web-dir=www
-        
-    - name: Add Android platform
-      run: |
-        npx cap add android
-        
+
     - name: Copy web assets
       run: |
-        # Ensure www directory exists
         mkdir -p www
-        # Copy all web assets to the www directory
         rsync -av --exclude 'android' --exclude 'www' ./ ./www/
-        npx cap copy android
-        
-    - name: Configure Android app
+
+    - name: Add Android platform
+      run: npx cap add android
+
+    - name: Sync web assets to Android
+      run: npx cap copy android
+
+    - name: Force Gradle 8.2.1 for Capacitor Android
       run: |
-        # Update app name and other configurations
-        sed -i 's/<string name="app_name">App<\/string>/<string name="app_name">Chem by Rika<\/string>/g' android/app/src/main/res/values/strings.xml
-        
-        # Copy favicon as app icon
-        cp favicon.ico android/app/src/main/res/drawable/ic_launcher.png
-        cp favicon.ico android/app/src/main/res/drawable/ic_launcher_round.png
-        
-        # Add internet permission if not exists
-        if ! grep -q "android.permission.INTERNET" android/app/src/main/AndroidManifest.xml; then
-          sed -i '/<application/a \        <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
-        fi
-        
-    - name: Create gradle wrapper
-      run: |
-        cd android
-        gradle wrapper --gradle-version 8.2.1
-        
+        echo "distributionUrl=https://services.gradle.org/distributions/gradle-8.2.1-bin.zip" > android/gradle/wrapper/gradle-wrapper.properties
+
     - name: Build APK
       run: |
         cd android
+        chmod +x gradlew
         ./gradlew assembleRelease
-        
+
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
         name: chembyrika-capacitor-apk
         path: android/app/build/outputs/apk/release/app-release.apk
-        
-    - name: Create Release
-      if: github.event_name == 'release'
-      uses: softprops/action-gh-release@v1
-      with:
-        files: android/app/build/outputs/apk/release/app-release.apk
-        tag_name: ${{ github.event.release.tag_name }}
-        name: ChemByRika Capacitor Android App
-        body: |
-          ChemByRika Android Application (Capacitor Build)
-          
-          Built from commit: ${{ github.sha }}
-          
-          ## Installation
-          Download and install the APK file on your Android device.
-          
-          ## Features
-          - Offline chemistry synthesis routes
-          - Search functionality
-          - Responsive design for different screen sizes
-          - Built with Capacitor

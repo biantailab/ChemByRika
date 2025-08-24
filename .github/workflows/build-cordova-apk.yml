@@ -33,15 +33,14 @@ jobs:
       run: |
         rsync -av --exclude 'app' --exclude '.github' --exclude '*.md' ./ ./app/www/
 
-    - name: Convert favicon.ico to Android icons
+    - name: Convert favicon.ico to icon.png
       run: |
         sudo apt-get update && sudo apt-get install -y imagemagick
-        convert favicon.ico -resize 192x192 app/res/icon.png
-        convert favicon.ico -resize 48x48 app/res/icon-48.png
-        convert favicon.ico -resize 72x72 app/res/icon-72.png
-        convert favicon.ico -resize 96x96 app/res/icon-96.png
-        convert favicon.ico -resize 144x144 app/res/icon-144.png
-        convert favicon.ico -resize 192x192 app/res/icon-192.png
+        convert favicon.ico -resize 192x192 app/www/icon.png
+
+    - name: Set Cordova icon in config.xml
+      run: |
+        sed -i '/<platform name="android">/a \    <icon src="www/icon.png" />' app/config.xml
 
     - name: Force Gradle 8.2.1 for Cordova Android
       run: |
