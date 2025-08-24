@@ -296,6 +296,10 @@
     function goBack() {
         if (document.referrer && document.referrer !== window.location.href) {
             window.history.back();
+        } else if (typeof search === 'function') {
+            $('#btn-fav').removeClass('md-accent btn-info');
+            $('input#search').val('');
+            search();
         } else {
             window.location.href = 'index.html';
         }
