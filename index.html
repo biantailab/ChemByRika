@@ -36,6 +36,10 @@
 <md-toolbar whiteframe="14" style="/*position:fixed;*/z-index: 999" class="">
     <div class="md-toolbar-tools">
 
+        <md-button class="md-icon-button" aria-label="Back" onclick="goBack()" style="margin-right: 8px;">
+            <span class="glyphicon glyphicon-backward ng-scope"></span>
+        </md-button>
+
         <md-button class="md-icon-button" aria-label="Search" onclick="search()">
             <md-icon md-svg-icon="svg/ic_search_48px.svg"></md-icon>
         </md-button>
@@ -287,6 +291,14 @@
             $('#btn-fav').addClass('md-accent btn-info');
         }
         search();
+    }
+
+    function goBack() {
+        if (document.referrer && document.referrer !== window.location.href) {
+            window.history.back();
+        } else {
+            window.location.href = 'index.html';
+        }
     }
 
     function EnterDown(e) {
