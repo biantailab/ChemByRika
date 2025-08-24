@@ -5,117 +5,58 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  release:
-    types: [ published ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        
+
     - name: Install Cordova
-      run: |
-        npm install -g cordova
-        cordova --version
-        
-    - name: Set up Android SDK
-      uses: android-actions/setup-android@v3
-      
+      run: npm install -g cordova
+
     - name: Create Cordova project
       run: |
-        cordova create chembyrika-app com.chembyrika.app ChemByRika
-        cd chembyrika-app
-        
-    - name: Add Android platform
-      run: |
-        cd chembyrika-app
+        cordova create app com.chembyrika.app "Chem by Rika"
+        cd app
         cordova platform add android@12.0.0
-        # 强制使用 Gradle 8.2.1
-        echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.2.1-bin.zip" > platforms/android/gradle/wrapper/gradle-wrapper.properties
-        
+
     - name: Copy web assets
       run: |
-        cd chembyrika-app
-        # Remove default www content
-        rm -rf www/*
-        # Copy project files to www
-        rsync -av --exclude 'chembyrika-app' --exclude '.github' --exclude 'README' --exclude '*.md' --exclude '.gitignore' ../ ./www/
-        
-    - name: Configure Cordova
+        rsync -av --exclude 'app' --exclude '.github' --exclude '*.md' ./ ./app/www/
+
+    - name: Convert favicon.ico to Android icons
       run: |
-        cd chembyrika-app
-        # Update config.xml
-        sed -i 's/<name>HelloCordova<\/name>/<name>Chem by Rika<\/name>/g' config.xml
-        sed -i 's/<description>A sample Apache Cordova application<\/description>/<description>Chemistry By Design Offline Client<\/description>/g' config.xml
-        sed -i 's/<author email="dev@cordova.apache.org" href="https:\/\/cordova.apache.org">Apache Cordova Team<\/author>/<author email="rika@example.com" href="https:\/\/github.com\/RikaSugisawa">Rika<\/author>/g' config.xml
-        
-        # Ensure drawable directories exist
-        mkdir -p platforms/android/app/src/main/res/drawable
-        mkdir -p platforms/android/app/src/main/res/drawable-hdpi
-        mkdir -p platforms/android/app/src/main/res/drawable-mdpi
-        mkdir -p platforms/android/app/src/main/res/drawable-xhdpi
-        mkdir -p platforms/android/app/src/main/res/drawable-xxhdpi
-        
-        # Copy favicon as app icon
-        cp ../favicon.ico platforms/android/app/src/main/res/drawable/icon.png
-        cp ../favicon.ico platforms/android/app/src/main/res/drawable-hdpi/icon.png
-        cp ../favicon.ico platforms/android/app/src/main/res/drawable-mdpi/icon.png
-        cp ../favicon.ico platforms/android/app/src/main/res/drawable-xhdpi/icon.png
-        cp ../favicon.ico platforms/android/app/src/main/res/drawable-xxhdpi/icon.png
-        
-        # Add permissions
-        sed -i '/<\/platform>/i \        <uses-permission android:name="android.permission.INTERNET" />' platforms/android/app/src/main/AndroidManifest.xml
-        sed -i '/<\/platform>/i \        <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />' platforms/android/app/src/main/AndroidManifest.xml
-        
-    - name: Add plugins
+        sudo apt-get update && sudo apt-get install -y imagemagick
+        convert favicon.ico -resize 192x192 app/res/icon.png
+        convert favicon.ico -resize 48x48 app/res/icon-48.png
+        convert favicon.ico -resize 72x72 app/res/icon-72.png
+        convert favicon.ico -resize 96x96 app/res/icon-96.png
+        convert favicon.ico -resize 144x144 app/res/icon-144.png
+        convert favicon.ico -resize 192x192 app/res/icon-192.png
+
+    - name: Force Gradle 8.2.1 for Cordova Android
       run: |
-        cd chembyrika-app
-        cordova plugin add cordova-plugin-whitelist
-        cordova plugin add cordova-plugin-file
-        cordova plugin add cordova-plugin-device
-        
-    - name: Create gradle wrapper
-      run: |
-        cd chembyrika-app/platforms/android
-        gradle wrapper --gradle-version 8.2.1
-        
+        cd app
+        ls platforms/android/gradle/wrapper
+        echo "distributionUrl=https://services.gradle.org/distributions/gradle-8.2.1-bin.zip" > platforms/android/gradle/wrapper/gradle-wrapper.properties
+
     - name: Build APK
       run: |
-        cd chembyrika-app/platforms/android
+        cd app/platforms/android
         chmod +x gradlew
         ./gradlew assembleRelease
-        
+
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
         name: chembyrika-cordova-apk
-        path: chembyrika-app/platforms/android/app/build/outputs/apk/release/app-release.apk
-        
-    - name: Create Release
-      if: github.event_name == 'release'
-      uses: softprops/action-gh-release@v1
-      with:
-        files: chembyrika-app/platforms/android/app/build/outputs/apk/release/app-release.apk
-        tag_name: ${{ github.event.release.tag_name }}
-        name: ChemByRika Cordova Android App
-        body: |
-          ChemByRika Android Application (Cordova Build)
-          
-          Built from commit: ${{ github.sha }}
-          
-          ## Installation
-          Download and install the APK file on your Android device.
-          
-          ## Features
-          - Offline chemistry synthesis routes
-          - Search functionality
-          - Responsive design for different screen sizes
-          - Built with Apache Cordova
+        path: app/platforms/android/app/build/outputs/apk/release/app-release.apk

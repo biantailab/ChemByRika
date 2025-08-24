@@ -238,6 +238,7 @@ jobs:
         
     - name: Build APK
       run: |
+        echo "distributionUrl=https://services.gradle.org/distributions/gradle-8.2.1-bin.zip" > android/gradle/wrapper/gradle-wrapper.properties
         cd android
         ./gradlew assembleRelease
         
