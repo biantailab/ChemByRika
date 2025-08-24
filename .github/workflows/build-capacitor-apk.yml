@@ -41,7 +41,7 @@ jobs:
         npm install @capacitor/core @capacitor/android
         
         # Initialize Capacitor
-        npx cap init "Chem by Rika" com.chembyrika.app --web-dir=.
+        npx cap init "Chem by Rika" com.chembyrika.app --web-dir=www
         
     - name: Add Android platform
       run: |
@@ -49,8 +49,10 @@ jobs:
         
     - name: Copy web assets
       run: |
-        # Copy all web assets to the web directory
-        rsync -av --exclude 'android' ./ ./
+        # Ensure www directory exists
+        mkdir -p www
+        # Copy all web assets to the www directory
+        rsync -av --exclude 'android' --exclude 'www' ./ ./www/
         npx cap copy android
         
     - name: Configure Android app
